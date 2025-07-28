@@ -24,4 +24,5 @@ public interface IVentaService {
     List<Producto> obtenerProductosVenta(Long codigoVenta);
     VentaDto obtenerCantidadVentasYMontoTotal(LocalDate fechaVenta);
     MayorVentaDto obtenerMayorVenta();
+    int obtenerCantidadProducto(List<Producto> listaProductos);
 }

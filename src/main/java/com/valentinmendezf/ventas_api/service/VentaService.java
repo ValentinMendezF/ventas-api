@@ -10,6 +10,7 @@ import com.valentinmendezf.ventas_api.repository.IVentaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 public class VentaService implements IVentaService{
@@ -96,21 +97,63 @@ public class VentaService implements IVentaService{
 
     @Override
     public List<Producto> obtenerProductosPocoStock() {
-        return List.of();
+        List<Producto> productosPocoStock = new ArrayList<>();
+        List<Producto> listaProductos = iProductoService.getAllProductos();
+        for (Producto producto : listaProductos){
+            if (producto.getCantidadDisponible() < 5){
+                productosPocoStock.add(producto);
+            }
+        }
+        return productosPocoStock;
     }
 
     @Override
     public List<Producto> obtenerProductosVenta(Long codigoVenta) {
-        return List.of();
+        return this.getOneVenta(codigoVenta).getListaProductos();
     }
 
     @Override
     public VentaDto obtenerCantidadVentasYMontoTotal(LocalDate fechaVenta) {
-        return null;
+        List<Venta> listaVentas = this.getAllVentas();
+        List<Venta> ventasDelDia = new ArrayList<>();
+        int cantVentas = 0;
+        for (Venta venta : listaVentas){
+            if (venta.getFechaVenta().equals(fechaVenta)){
+                ventasDelDia.add(venta);
+                cantVentas+=1;
+            }
+        }
+        double monto = 0.0;
+        for (Venta venta : ventasDelDia){
+            monto+=venta.getTotal();
+        }
+        return new VentaDto(monto,cantVentas);
     }
 
     @Override
     public MayorVentaDto obtenerMayorVenta() {
-        return null;
+        List<Venta> listaVentas = this.getAllVentas();
+        double mayorMonto=0.0;
+        Long mayorVenta = 0L;
+        for (Venta venta : listaVentas){
+            if (venta.getTotal() > mayorMonto){
+                mayorMonto = venta.getTotal();
+                mayorVenta = venta.getCodigoVenta();
+            }
+        }
+        Venta ventaMayor = this.getOneVenta(mayorVenta);
+        return new MayorVentaDto(ventaMayor.getCodigoVenta(), ventaMayor.getTotal(),
+                this.obtenerCantidadProducto(ventaMayor.getListaProductos()),
+                ventaMayor.getCliente().getNombre(),
+                ventaMayor.getCliente().getApellido());
+    }
+
+    @Override
+    public int obtenerCantidadProducto(List<Producto> listaProductos) {
+        int contador = 0;
+        for (Producto producto : listaProductos){
+            contador+=1;
+        }
+        return contador;
     }
 }
