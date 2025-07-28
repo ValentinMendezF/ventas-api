@@ -1,5 +1,6 @@
 package com.valentinmendezf.ventas_api.service;
 
+import com.valentinmendezf.ventas_api.dto.MayorVentaDto;
 import com.valentinmendezf.ventas_api.dto.VentaDto;
 import com.valentinmendezf.ventas_api.exceptions.NoHayStock;
 import com.valentinmendezf.ventas_api.model.Cliente;
@@ -63,7 +64,6 @@ public class VentaService implements IVentaService{
     @Override
     public int obtenerCantidadProducto(List<Producto> listaProductos, Long codigoProducto) {
         int cantidad = 0;
-        Producto producto = iProductoService.getOneProducto(codigoProducto);
         for (Producto p : listaProductos){
             if (codigoProducto.equals(p.getCodigoProducto())){
                 cantidad +=1;
@@ -74,7 +74,7 @@ public class VentaService implements IVentaService{
 
     @Override
     public Double calcularTotal(List<Producto> listaProductos) {
-        Double total = 0.0;
+        double total = 0.0;
         for (Producto producto : listaProductos){
             total = total + (producto.getCosto() * this.obtenerCantidadProducto(listaProductos, producto.getCodigoProducto()));
         }
@@ -106,6 +106,11 @@ public class VentaService implements IVentaService{
 
     @Override
     public VentaDto obtenerCantidadVentasYMontoTotal(LocalDate fechaVenta) {
+        return null;
+    }
+
+    @Override
+    public MayorVentaDto obtenerMayorVenta() {
         return null;
     }
 }

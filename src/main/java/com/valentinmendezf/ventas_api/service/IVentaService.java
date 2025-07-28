@@ -1,5 +1,6 @@
 package com.valentinmendezf.ventas_api.service;
 
+import com.valentinmendezf.ventas_api.dto.MayorVentaDto;
 import com.valentinmendezf.ventas_api.dto.VentaDto;
 import com.valentinmendezf.ventas_api.model.Producto;
 import com.valentinmendezf.ventas_api.model.Venta;
@@ -22,4 +23,5 @@ public interface IVentaService {
     List<Producto> obtenerProductosPocoStock();
     List<Producto> obtenerProductosVenta(Long codigoVenta);
     VentaDto obtenerCantidadVentasYMontoTotal(LocalDate fechaVenta);
+    MayorVentaDto obtenerMayorVenta();
 }
