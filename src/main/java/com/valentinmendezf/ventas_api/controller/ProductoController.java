@@ -16,7 +16,7 @@ public class ProductoController {
     public ResponseEntity<String> createProducto(@RequestParam String nombre,
                                                  @RequestParam String marca,
                                                  @RequestParam Double costo,
-                                                 @RequestParam int cantidadDisponible ){
+                                                 @RequestParam Integer cantidadDisponible ){
         try {
             iProductoService.createProducto(nombre,marca,costo,cantidadDisponible);
             return ResponseEntity.ok("Producto creado correctamente.");
@@ -50,7 +50,7 @@ public class ProductoController {
                                                  @RequestParam(required = false, name = "nombre") String nuevoNombre,
                                                  @RequestParam(required = false, name = "marca") String nuevaMarca,
                                                  @RequestParam(required = false, name = "costo") Double nuevoCosto,
-                                                 @RequestParam(required = false, name = "cantidadDisponible") int nuevaCantidadDisponible){
+                                                 @RequestParam(required = false, name = "cantidadDisponible") Integer nuevaCantidadDisponible){
         try {
             iProductoService.updateProducto(codigo, nuevoNombre, nuevaMarca, nuevoCosto, nuevaCantidadDisponible);
             return ResponseEntity.ok("Producto editado correctamente.");

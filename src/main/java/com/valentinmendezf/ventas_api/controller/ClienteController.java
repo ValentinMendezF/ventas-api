@@ -51,12 +51,12 @@ public class ClienteController {
     }
 
     @PutMapping("/clientes/update/{id}")
-    public ResponseEntity<String> updateCliente(@PathVariable Long codigo,
+    public ResponseEntity<String> updateCliente(@PathVariable Long id,
                                                 @RequestParam(required = false, name = "nombre") String nuevoNombre,
                                                 @RequestParam(required = false, name = "apellido") String nuevoApellido,
                                                 @RequestParam(required = false, name = "dni") String nuevoDni) {
         try {
-            iClienteService.updateCliente(codigo, nuevoNombre, nuevoApellido,nuevoDni);
+            iClienteService.updateCliente(id, nuevoNombre, nuevoApellido,nuevoDni);
             return ResponseEntity.ok("Cliente editado correctamente.");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error al editar cliente: " + e.getMessage());

@@ -3,8 +3,10 @@ package com.valentinmendezf.ventas_api.service;
 import com.valentinmendezf.ventas_api.model.Cliente;
 import com.valentinmendezf.ventas_api.repository.IClienteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import java.util.List;
+import org.springframework.stereotype.Service;
 
+import java.util.List;
+@Service
 public class ClienteService implements IClienteService {
 
     @Autowired

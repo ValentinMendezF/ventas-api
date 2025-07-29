@@ -21,14 +21,13 @@ public class Venta {
 
     private LocalDate fechaVenta;
 
-    private Double total;
+    private double total;
 
     @ManyToOne
     @JoinColumn(name = "cliente_id")
     private Cliente cliente;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "venta_id")
-    private List<Producto> listaProductos;
+    @OneToMany
+    private List<VentaProducto> listaProductos;
 }
 

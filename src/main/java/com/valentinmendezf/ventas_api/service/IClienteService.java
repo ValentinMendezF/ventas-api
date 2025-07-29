@@ -1,10 +1,9 @@
 package com.valentinmendezf.ventas_api.service;
 
 import com.valentinmendezf.ventas_api.model.Cliente;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
-@Service
+
 public interface IClienteService {
     void createCliente(String nombre, String apellido, String dni);
 

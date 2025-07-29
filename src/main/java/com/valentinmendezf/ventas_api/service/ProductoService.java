@@ -3,15 +3,16 @@ package com.valentinmendezf.ventas_api.service;
 import com.valentinmendezf.ventas_api.model.Producto;
 import com.valentinmendezf.ventas_api.repository.IProductoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
-
+@Service
 public class ProductoService implements IProductoService{
     @Autowired
     IProductoRepository iProductoRepository;
 
     @Override
-    public void createProducto(String nombre, String marca, Double costo, int cantidadDisponible) {
+    public void createProducto(String nombre, String marca, Double costo, Integer cantidadDisponible) {
         Producto producto = new Producto();
         producto.setNombre(nombre);
         producto.setMarca(marca);
@@ -37,7 +38,7 @@ public class ProductoService implements IProductoService{
 
     @Override
     public void updateProducto(Long codigo, String nuevoNombre, String nuevaMarca, Double nuevoCosto,
-                               int nuevaCantidadDisponible) {
+                               Integer nuevaCantidadDisponible) {
         Producto nuevoProducto = this.getOneProducto(codigo);
         if (nuevoNombre != null){
             nuevoProducto.setNombre(nuevoNombre);
@@ -48,7 +49,7 @@ public class ProductoService implements IProductoService{
         if (nuevoCosto != null){
             nuevoProducto.setCosto(nuevoCosto);
         }
-        if (nuevaCantidadDisponible != 0){
+        if (nuevaCantidadDisponible != null){
             nuevoProducto.setCantidadDisponible(nuevaCantidadDisponible);
         }
         iProductoRepository.save(nuevoProducto);

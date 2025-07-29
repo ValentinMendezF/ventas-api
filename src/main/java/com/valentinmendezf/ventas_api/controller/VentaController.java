@@ -5,6 +5,7 @@ import com.valentinmendezf.ventas_api.dto.MayorVentaDto;
 import com.valentinmendezf.ventas_api.dto.VentaDto;
 import com.valentinmendezf.ventas_api.model.Producto;
 import com.valentinmendezf.ventas_api.model.Venta;
+import com.valentinmendezf.ventas_api.model.VentaProducto;
 import com.valentinmendezf.ventas_api.service.IVentaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -12,13 +13,13 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
-
+@RestController
 public class VentaController {
     @Autowired
     IVentaService iVentaService;
 
     @PostMapping("/ventas/create")
-    public ResponseEntity<String> createVenta(@RequestParam Long idCliente, @RequestBody List<Producto> listaProductos){
+    public ResponseEntity<String> createVenta(@RequestParam Long idCliente, @RequestBody List<VentaProducto> listaProductos){
         try {
             iVentaService.createVenta(idCliente,listaProductos);
             return ResponseEntity.ok("Venta creada correctamente.");
@@ -51,7 +52,7 @@ public class VentaController {
         }
     }
     @PutMapping("/ventas/update/{codigo}")
-    public ResponseEntity<String> updateVenta(@PathVariable Long codigo,@RequestBody List<Producto> nuevaListaProductos){
+    public ResponseEntity<String> updateVenta(@PathVariable Long codigo,@RequestBody List<VentaProducto> nuevaListaProductos){
         try {
             iVentaService.editVenta(codigo,nuevaListaProductos);
             return ResponseEntity.ok("Venta editada correctamente");
