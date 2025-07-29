@@ -52,9 +52,12 @@ public class VentaController {
         }
     }
     @PutMapping("/ventas/update/{codigo}")
-    public ResponseEntity<String> updateVenta(@PathVariable Long codigo,@RequestBody List<VentaProducto> nuevaListaProductos){
+    public ResponseEntity<String> updateVenta(@PathVariable Long codigo,
+                                              @RequestParam(required = false, name = "nuevaFecha") LocalDate nuevaFechaVenta,
+                                              @RequestParam(required = false, name = "nuevoCliente") Long nuevoCliente,
+                                              @RequestBody(required = false) List<VentaProducto> nuevaListaProductos){
         try {
-            iVentaService.editVenta(codigo,nuevaListaProductos);
+            iVentaService.editVenta(codigo,nuevaFechaVenta,nuevoCliente,nuevaListaProductos);
             return ResponseEntity.ok("Venta editada correctamente");
         }catch (Exception e){
             return ResponseEntity.badRequest().body("Error al editar venta: " + e.getMessage());
