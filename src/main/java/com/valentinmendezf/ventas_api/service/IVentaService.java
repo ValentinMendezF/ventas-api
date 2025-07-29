@@ -19,8 +19,8 @@ public interface IVentaService {
     void actualizarStock(Producto producto, int cantidad);
     boolean verificarStock(Producto producto, int cantidad);
     List<Producto> obtenerProductosPocoStock();
-    List<Producto> obtenerProductosVenta();
-    VentaDto obtenerCantidadVentasYMontoTotal();
+    List<VentaProducto> obtenerProductosVenta(Long codigoVenta);
+    VentaDto obtenerCantidadVentasYMontoTotal(LocalDate fechaVenta);
     MayorVentaDto obtenerMayorVenta();
     void devolverProductos(List<VentaProducto> listaProductos);
 }

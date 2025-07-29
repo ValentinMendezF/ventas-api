@@ -70,7 +70,7 @@ public class VentaController {
 
     }
     @GetMapping("/ventas/productos/{codigo}")
-    public ResponseEntity<List<Producto>> obtenerProductosVenta(@PathVariable Long codigo){
+    public ResponseEntity<List<VentaProducto>> obtenerProductosVenta(@PathVariable Long codigo){
         try {
             return ResponseEntity.ok(iVentaService.obtenerProductosVenta(codigo));
         } catch (Exception e) {
