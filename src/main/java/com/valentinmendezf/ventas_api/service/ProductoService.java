@@ -1,10 +1,13 @@
 package com.valentinmendezf.ventas_api.service;
 
+import com.valentinmendezf.ventas_api.dto.ProductoEntradaDTO;
+import com.valentinmendezf.ventas_api.dto.ProductoSalidaDTO;
 import com.valentinmendezf.ventas_api.model.Producto;
 import com.valentinmendezf.ventas_api.repository.IProductoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 @Service
 public class ProductoService implements IProductoService{
@@ -22,24 +25,43 @@ public class ProductoService implements IProductoService{
     }
 
     @Override
-    public List<Producto> getAllProductos() {
-        return iProductoRepository.findAll();
+    public List<ProductoSalidaDTO> getAllProductos() {
+        List<Producto> productos = iProductoRepository.findAll();
+        List<ProductoSalidaDTO> productosSalidaDTO = new ArrayList<>();
+        for (Producto producto : productos){
+            ProductoSalidaDTO productoSalidaDTO = new ProductoSalidaDTO();
+            productoSalidaDTO.setCodigoProducto(producto.getCodigoProducto());
+            productoSalidaDTO.setNombre(producto.getNombre());
+            productoSalidaDTO.setCosto(producto.getCosto());
+            productoSalidaDTO.setMarca(producto.getMarca());
+            productoSalidaDTO.setCantidadDisponible(producto.getCantidadDisponible());
+            productosSalidaDTO.add(productoSalidaDTO);
+        }
+        return productosSalidaDTO;
     }
 
     @Override
-    public Producto getOneProducto(Long codigo) {
-        return iProductoRepository.findById(codigo).orElseThrow();
+    public ProductoSalidaDTO getOneProducto(Long codigo) {
+        Producto producto = iProductoRepository.findById(codigo).orElseThrow();
+        ProductoSalidaDTO productoSalidaDTO = new ProductoSalidaDTO();
+        productoSalidaDTO.setCodigoProducto(producto.getCodigoProducto());
+        productoSalidaDTO.setNombre(producto.getNombre());
+        productoSalidaDTO.setCosto(producto.getCosto());
+        productoSalidaDTO.setMarca(producto.getMarca());
+        productoSalidaDTO.setCantidadDisponible(producto.getCantidadDisponible());
+        return productoSalidaDTO;
     }
 
     @Override
     public void deleteProducto(Long codigo) {
-        iProductoRepository.delete(this.getOneProducto(codigo));
+        Producto producto = iProductoRepository.findById(codigo).orElseThrow();
+        iProductoRepository.delete(producto);
     }
 
     @Override
     public void updateProducto(Long codigo, String nuevoNombre, String nuevaMarca, Double nuevoCosto,
                                Integer nuevaCantidadDisponible) {
-        Producto nuevoProducto = this.getOneProducto(codigo);
+        Producto nuevoProducto = iProductoRepository.findById(codigo).orElseThrow();
         if (nuevoNombre != null){
             nuevoProducto.setNombre(nuevoNombre);
         }

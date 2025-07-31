@@ -1,6 +1,5 @@
 package com.valentinmendezf.ventas_api.model;
 
-
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -16,8 +15,13 @@ public class VentaProducto {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private int cantidad;
     @ManyToOne
-    @JoinColumn(name = "id_producto")
+    @JoinColumn(name = "codigo_venta")
+    private Venta venta;
+    @ManyToOne
+    @JoinColumn(name = "codigo_producto")
     private Producto producto;
+    private int cantidad;
 }
+
+

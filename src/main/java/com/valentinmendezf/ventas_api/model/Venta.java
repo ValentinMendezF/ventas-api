@@ -7,7 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -18,16 +19,12 @@ public class Venta {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long codigoVenta;
-
     private LocalDate fechaVenta;
-
-    private double total;
-
+    private Double total;
+    @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<VentaProducto> listaVentasProductos = new HashSet<>();
     @ManyToOne
-    @JoinColumn(name = "cliente_id")
+    @JoinColumn(name = "fk_cliente")
     private Cliente cliente;
-
-    @OneToMany
-    private List<VentaProducto> listaProductos;
 }
 

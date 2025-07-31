@@ -1,10 +1,12 @@
 package com.valentinmendezf.ventas_api.service;
 
+import com.valentinmendezf.ventas_api.dto.ClienteDTO;
 import com.valentinmendezf.ventas_api.model.Cliente;
 import com.valentinmendezf.ventas_api.repository.IClienteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 @Service
 public class ClienteService implements IClienteService {
@@ -22,23 +24,36 @@ public class ClienteService implements IClienteService {
     }
 
     @Override
-    public List<Cliente> getAllClientes() {
-        return iClienteRepository.findAll();
+    public List<ClienteDTO> getAllClientes() {
+        List<Cliente> listaClientes = iClienteRepository.findAll();
+        List<ClienteDTO> listaClientesDTO = new ArrayList<>();
+        for (Cliente cliente : listaClientes){
+            ClienteDTO clienteDTO = new ClienteDTO();
+            clienteDTO.setIdCliente(cliente.getIdCliente());
+            clienteDTO.setNombre(cliente.getNombre());
+            clienteDTO.setApellido(cliente.getApellido());
+            clienteDTO.setDni(cliente.getDni());
+            listaClientesDTO.add(clienteDTO);
+        }
+        return listaClientesDTO;
     }
 
     @Override
-    public Cliente getOneCliente(Long idCliente) {
-        return iClienteRepository.findById(idCliente).orElseThrow();
+    public ClienteDTO getOneCliente(Long idCliente) {
+        Cliente cliente = iClienteRepository.findById(idCliente).orElseThrow();
+        return new ClienteDTO(cliente.getIdCliente(), cliente.getNombre(), cliente.getApellido(),
+                cliente.getDni());
     }
 
     @Override
     public void deleteCliente(Long idCliente) {
-        iClienteRepository.delete(this.getOneCliente(idCliente));
+        Cliente cliente = iClienteRepository.findById(idCliente).orElseThrow();
+        iClienteRepository.delete(cliente);
     }
 
     @Override
     public void updateCliente(Long idCliente, String nuevoNombre, String nuevoApellido, String nuevoDni) {
-        Cliente nuevoCliente = this.getOneCliente(idCliente);
+        Cliente nuevoCliente = iClienteRepository.findById(idCliente).orElseThrow();
         if (nuevoNombre != null) {
             nuevoCliente.setNombre(nuevoNombre);
         }

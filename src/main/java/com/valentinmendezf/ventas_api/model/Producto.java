@@ -6,7 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -21,4 +22,6 @@ public class Producto {
     private String marca;
     private Double costo;
     private Integer cantidadDisponible;
+    @OneToMany(mappedBy = "producto")
+    private Set<VentaProducto> listaVentasProductos = new HashSet<>();
 }

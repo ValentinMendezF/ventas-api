@@ -9,10 +9,10 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class MayorVentaDto {
-    private Long codidoVenta;
+public class VentaMayorDTO {
+    private Long codigoVenta;
     private Double total;
     private int cantidadProductos;
     private String nombreCliente;
-    private String apellido;
+    private String apellidoCliente;
 }

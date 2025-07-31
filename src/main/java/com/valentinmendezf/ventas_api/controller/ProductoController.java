@@ -1,6 +1,7 @@
 package com.valentinmendezf.ventas_api.controller;
 
-import com.valentinmendezf.ventas_api.model.Producto;
+import com.valentinmendezf.ventas_api.dto.ProductoEntradaDTO;
+import com.valentinmendezf.ventas_api.dto.ProductoSalidaDTO;
 import com.valentinmendezf.ventas_api.service.IProductoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -25,11 +26,11 @@ public class ProductoController {
         }
     }
     @GetMapping("/productos")
-    public ResponseEntity<List<Producto>> getAllProductos(){
+    public ResponseEntity<List<ProductoSalidaDTO>> getAllProductos(){
         return ResponseEntity.ok(iProductoService.getAllProductos());
     }
     @GetMapping("/productos/{codigo}")
-    public ResponseEntity<Producto> getOneProducto(@PathVariable Long codigo){
+    public ResponseEntity<ProductoSalidaDTO> getOneProducto(@PathVariable Long codigo){
         try {
             return ResponseEntity.ok(iProductoService.getOneProducto(codigo));
         } catch (Exception e) {

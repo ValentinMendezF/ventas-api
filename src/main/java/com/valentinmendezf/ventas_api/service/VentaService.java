@@ -1,180 +1,215 @@
 package com.valentinmendezf.ventas_api.service;
 
-import com.valentinmendezf.ventas_api.dto.MayorVentaDto;
-import com.valentinmendezf.ventas_api.dto.VentaDto;
+import com.valentinmendezf.ventas_api.dto.*;
 import com.valentinmendezf.ventas_api.exceptions.NoHayStock;
+import com.valentinmendezf.ventas_api.model.Cliente;
 import com.valentinmendezf.ventas_api.model.Producto;
 import com.valentinmendezf.ventas_api.model.Venta;
 import com.valentinmendezf.ventas_api.model.VentaProducto;
+import com.valentinmendezf.ventas_api.repository.IClienteRepository;
+import com.valentinmendezf.ventas_api.repository.IProductoRepository;
 import com.valentinmendezf.ventas_api.repository.IVentaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class VentaService implements IVentaService {
     @Autowired
-    IClienteService iClienteService;
-    @Autowired
     IVentaRepository iVentaRepository;
+    @Autowired
+    IClienteRepository iClienteRepository;
+    @Autowired
+    IVentaProductoService iVentaProductoService;
+    @Autowired
+    IProductoRepository iProductoRepository;
     @Autowired
     IProductoService iProductoService;
     @Autowired
-    IVentaProductoService iVentaProductoService;
+    IClienteService iClienteService;
 
     @Override
-    public void createVenta(Long idCliente, List<VentaProducto> listaVentaProductos) {
-        List<VentaProducto> lista = new ArrayList<>();
+    @Transactional
+    public void createVenta(Long idCliente, List<ProductoEntradaDTO> listaProductosDTO) {
+        Set<VentaProducto> listaVentasProductos = new HashSet<>();
         Venta venta = new Venta();
-        for (VentaProducto ventaProducto : listaVentaProductos) {
-            Producto producto = iProductoService.getOneProducto(ventaProducto.getProducto().getCodigoProducto());
-            boolean noHayStock = verificarStock(producto, ventaProducto.getCantidad());
-            if (noHayStock) {
-                throw new NoHayStock("No hay suficiente stock del producto " + producto.getNombre());
+        for (ProductoEntradaDTO productoEntradaDTO : listaProductosDTO) {
+            Producto producto = iProductoRepository.findById(productoEntradaDTO.getCodigoProducto()).orElseThrow();
+            if (verificarStock(productoEntradaDTO)) {
+                throw new NoHayStock("No hay stock del producto: " + producto.getNombre());
             }
-            VentaProducto venProducto = iVentaProductoService.createVentaProducto(ventaProducto.getProducto().getCodigoProducto(), ventaProducto.getCantidad());
-            lista.add(venProducto);
-            actualizarStock(producto, ventaProducto.getCantidad());
+            listaVentasProductos.add(iVentaProductoService.createVentaProducto(venta, producto,
+                    productoEntradaDTO.getCantidadComprada()));
+            actualizarStock(producto, productoEntradaDTO);
         }
-        venta.setCliente(iClienteService.getOneCliente(idCliente));
+        Cliente cliente = iClienteRepository.findById(idCliente).orElseThrow();
+        venta.setCliente(cliente);
         venta.setFechaVenta(LocalDate.now());
-        venta.setTotal(calcularTotal(listaVentaProductos));
-        venta.setListaProductos(lista);
+        venta.setListaVentasProductos(listaVentasProductos);
+        venta.setTotal(calcularTotal(listaProductosDTO));
         iVentaRepository.save(venta);
     }
-
     @Override
-    public List<Venta> getAllVentas() {
-        return iVentaRepository.findAll();
+    @Transactional
+    public void actualizarStock(Producto producto, ProductoEntradaDTO productoEntradaDTO) {
+        iProductoService.updateProducto(producto.getCodigoProducto(), null,null,null,
+                producto.getCantidadDisponible() - productoEntradaDTO.getCantidadComprada());
     }
-
     @Override
-    public Venta getOneVenta(Long codigo) {
-        return iVentaRepository.findById(codigo).orElseThrow();
+    @Transactional
+    public boolean verificarStock(ProductoEntradaDTO productoEntradaDTO) {
+        Producto producto = iProductoRepository.findById(productoEntradaDTO.getCodigoProducto()).orElseThrow();
+        return producto.getCantidadDisponible() < productoEntradaDTO.getCantidadComprada();
     }
-
     @Override
-    public void deleteVenta(Long codigo) {
-        iVentaRepository.deleteById(codigo);
-    }
-
-    @Override
-    public void editVenta(Long codigo, LocalDate nuevaFechaVenta, Long nuevoCliente, List<VentaProducto> nuevaListaProductos) {
-        Venta venta = getOneVenta(codigo);
-        if (nuevoCliente != null) {
-            venta.setCliente(iClienteService.getOneCliente(nuevoCliente));
-        }
-        if (nuevaFechaVenta != null) {
-            venta.setFechaVenta(nuevaFechaVenta);
-        }
-        if (nuevaListaProductos != null) {
-            devolverProductos(venta.getListaProductos());
-            List<VentaProducto> lista = new ArrayList<>();
-            for (VentaProducto ventaProducto : nuevaListaProductos) {
-                Producto producto = iProductoService.getOneProducto(ventaProducto.getProducto().getCodigoProducto());
-                boolean noHayStock = verificarStock(producto, ventaProducto.getCantidad());
-                if (noHayStock) {
-                    throw new NoHayStock("No hay suficiente stock del producto " + producto.getNombre());
-                }
-                VentaProducto venProducto = iVentaProductoService.createVentaProducto(ventaProducto.getProducto().getCodigoProducto(), ventaProducto.getCantidad());
-                lista.add(venProducto);
-                actualizarStock(producto, ventaProducto.getCantidad());
-            }
-            venta.setTotal(calcularTotal(nuevaListaProductos));
-            venta.setListaProductos(lista);
-        }
-        iVentaRepository.save(venta);
-    }
-
-    public void devolverProductos(List<VentaProducto> listaProductos) {
-        for (VentaProducto ventaProducto : listaProductos) {
-            Producto producto = iProductoService.getOneProducto(ventaProducto.getProducto().getCodigoProducto());
-            producto.setCantidadDisponible(producto.getCantidadDisponible() + ventaProducto.getCantidad());
-        }
-    }
-
-    @Override
-    public double calcularTotal(List<VentaProducto> listaVentaProductos) {
+    @Transactional
+    public Double calcularTotal(List<ProductoEntradaDTO> listaProductosDTO) {
         double total = 0.0;
-        for (VentaProducto ventaProducto : listaVentaProductos) {
-            Producto producto = iProductoService.getOneProducto(ventaProducto.getProducto().getCodigoProducto());
-            total += producto.getCosto() + ventaProducto.getCantidad();
+        for (ProductoEntradaDTO productoEntradaDTO : listaProductosDTO) {
+            Producto producto = iProductoRepository.findById(productoEntradaDTO.getCodigoProducto()).orElseThrow();
+            total += producto.getCosto() * productoEntradaDTO.getCantidadComprada();
         }
         return total;
     }
 
     @Override
-    public void actualizarStock(Producto producto, int cantidadVendida) {
-        producto.setCantidadDisponible(producto.getCantidadDisponible() - cantidadVendida);
+    @Transactional
+    public List<VentaDTO> getAllVentas() {
+        List<Venta> listaVentas = iVentaRepository.findAll();
+        List<VentaDTO> listaVentasDTO = new ArrayList<>();
+        for (Venta venta : listaVentas) {
+            List<ProductoEntradaDTO> listaProductos = new ArrayList<>();
+            VentaDTO ventaDTO = new VentaDTO();
+            ventaDTO.setCodigoVenta(venta.getCodigoVenta());
+            ventaDTO.setTotal(venta.getTotal());
+            ventaDTO.setFechaVenta(venta.getFechaVenta());
+            ventaDTO.setIdCliente(venta.getCliente().getIdCliente());
+            ventaDTO.setNombreCliente(venta.getCliente().getNombre());
+            for (VentaProducto ventaProducto : venta.getListaVentasProductos()) {
+                ProductoEntradaDTO productoEntradaDTO = new ProductoEntradaDTO();
+                productoEntradaDTO.setCodigoProducto(ventaProducto.getProducto().getCodigoProducto());
+                productoEntradaDTO.setCosto(ventaProducto.getProducto().getCosto());
+                productoEntradaDTO.setMarca(ventaProducto.getProducto().getMarca());
+                productoEntradaDTO.setNombre(ventaProducto.getProducto().getNombre());
+                productoEntradaDTO.setCantidadComprada(ventaProducto.getCantidad());
+                listaProductos.add(productoEntradaDTO);
+            }
+            ventaDTO.setListaProductos(listaProductos);
+            listaVentasDTO.add(ventaDTO);
+        }
+        return listaVentasDTO;
     }
 
     @Override
-    public boolean verificarStock(Producto producto, int cantidad) {
-        return producto.getCantidadDisponible() < cantidad;
+    @Transactional
+    public VentaDTO getOneVenta(Long codigo) {
+        Venta venta = iVentaRepository.findById(codigo).orElseThrow();
+        VentaDTO ventaDTO = new VentaDTO();
+        List<ProductoEntradaDTO> listaProductos = new ArrayList<>();
+        for (VentaProducto ventaProducto : venta.getListaVentasProductos()) {
+            ProductoEntradaDTO productoEntradaDTO = new ProductoEntradaDTO();
+            productoEntradaDTO.setNombre(ventaProducto.getProducto().getNombre());
+            productoEntradaDTO.setCodigoProducto(ventaProducto.getProducto().getCodigoProducto());
+            productoEntradaDTO.setCosto(ventaProducto.getProducto().getCosto());
+            productoEntradaDTO.setMarca(ventaProducto.getProducto().getMarca());
+            productoEntradaDTO.setCantidadComprada(ventaProducto.getCantidad());
+            listaProductos.add(productoEntradaDTO);
+        }
+        ventaDTO.setListaProductos(listaProductos);
+        ventaDTO.setCodigoVenta(venta.getCodigoVenta());
+        ventaDTO.setFechaVenta(venta.getFechaVenta());
+        ventaDTO.setTotal(venta.getTotal());
+        ventaDTO.setIdCliente(venta.getCliente().getIdCliente());
+        ventaDTO.setNombreCliente(venta.getCliente().getNombre());
+        return ventaDTO;
     }
 
     @Override
-    public List<Producto> obtenerProductosPocoStock() {
-        List<Producto> productosPocoStock = new ArrayList<>();
-        List<Producto> listaProductos = iProductoService.getAllProductos();
-        for (Producto producto : listaProductos) {
-            if (producto.getCantidadDisponible() < 5) {
-                productosPocoStock.add(producto);
+    @Transactional
+    public void deleteVenta(Long codigo) {
+        iVentaRepository.deleteById(codigo);
+    }
+
+
+    @Override
+    @Transactional
+    public void updateVenta(Long codigo, List<ProductoEntradaDTO> listaProductosDTO) {
+        Venta venta = iVentaRepository.findById(codigo).orElseThrow();
+        for (VentaProducto ventaProducto : venta.getListaVentasProductos()){
+            devolverProductos(ventaProducto.getProducto(),ventaProducto.getCantidad());
+        }
+        Cliente cliente = venta.getCliente();
+
+        deleteVenta(codigo);
+        createVenta(cliente.getIdCliente(), listaProductosDTO);
+    }
+
+    @Override
+    @Transactional
+    public void devolverProductos(Producto producto,int cantidad) {
+        iProductoService.updateProducto(producto.getCodigoProducto(), null,null,null,
+                producto.getCantidadDisponible() + cantidad);
+    }
+
+    @Override
+    public List<ProductoSalidaDTO> getProductosPocoStock() {
+        List<Producto> listaProductos = iProductoRepository.findAll();
+        List<ProductoSalidaDTO> productosPocoStockSalidaDTO = new ArrayList<>();
+        for (Producto producto : listaProductos){
+            if (producto.getCantidadDisponible() < 5){
+                productosPocoStockSalidaDTO.add(new ProductoSalidaDTO(producto.getCodigoProducto(), producto.getNombre(),
+                        producto.getMarca(), producto.getCosto(), producto.getCantidadDisponible()));
             }
         }
-        return productosPocoStock;
-    }
-
-
-    @Override
-    public List<VentaProducto> obtenerProductosVenta(Long codigoVenta) {
-        return this.getOneVenta(codigoVenta).getListaProductos();
+        return productosPocoStockSalidaDTO;
     }
 
     @Override
-    public VentaDto obtenerCantidadVentasYMontoTotal(LocalDate fechaVenta) {
-        List<Venta> listaVentas = this.getAllVentas();
-        List<Venta> ventasDelDia = new ArrayList<>();
-        int cantVentas = 0;
-        for (Venta venta : listaVentas){
-            if (venta.getFechaVenta().equals(fechaVenta)){
-                ventasDelDia.add(venta);
-                cantVentas+=1;
+    public List<ProductoEntradaDTO> getProductosVenta(Long codigo) {
+        VentaDTO ventaDTO = getOneVenta(codigo);
+        return ventaDTO.getListaProductos();
+    }
+
+    @Override
+    public VentaDiaDTO getVentasDia(LocalDate fecha) {
+        List<VentaDTO> listaVentasDTO = getAllVentas();
+        List<VentaDTO> ventasDia = new ArrayList<>();
+        double total = 0.0;
+        int cantidad = 0;
+        for (VentaDTO ventaDTO : listaVentasDTO){
+            if (ventaDTO.getFechaVenta().equals(fecha)){
+                ventasDia.add(ventaDTO);
             }
         }
-        double monto = 0.0;
-        for (Venta venta : ventasDelDia){
-            monto+=venta.getTotal();
+        for (VentaDTO ventaDTO : ventasDia){
+            total += ventaDTO.getTotal();
+            cantidad += 1;
         }
-        return new VentaDto(monto,cantVentas);
+        return new VentaDiaDTO(total,cantidad);
     }
 
     @Override
-    public MayorVentaDto obtenerMayorVenta() {
-        List<Venta> listaVentas = getAllVentas();
-        double mayorMonto=0.0;
-        Long mayorVenta = 0L;
-        for (Venta venta : listaVentas){
-            if (venta.getTotal() > mayorMonto){
-                mayorMonto = venta.getTotal();
-                mayorVenta = venta.getCodigoVenta();
+    public VentaMayorDTO getVentaMayor() {
+        List<VentaDTO> listaVentasDTO = getAllVentas();
+        VentaDTO mayorVentaDTO = listaVentasDTO.get(0);
+        for (VentaDTO ventaDTO : listaVentasDTO){
+            if (ventaDTO.getTotal() > mayorVentaDTO.getTotal()){
+                mayorVentaDTO = ventaDTO;
             }
         }
-        Venta ventaMayor = getOneVenta(mayorVenta);
-        return new MayorVentaDto(ventaMayor.getCodigoVenta(), ventaMayor.getTotal(),
-                obtenerCantidadProducto(ventaMayor.getListaProductos()),
-                ventaMayor.getCliente().getNombre(),
-                ventaMayor.getCliente().getApellido());
+        int cantidadProductos = 0;
+        for (ProductoEntradaDTO productoEntradaDTO : mayorVentaDTO.getListaProductos()){
+            cantidadProductos += productoEntradaDTO.getCantidadComprada();
+        }
+        ClienteDTO clienteDTO = iClienteService.getOneCliente(mayorVentaDTO.getIdCliente());
+        return new VentaMayorDTO(mayorVentaDTO.getCodigoVenta(), mayorVentaDTO.getTotal(), cantidadProductos,
+                clienteDTO.getNombre(), clienteDTO.getApellido());
     }
 
-    public int obtenerCantidadProducto(List<VentaProducto> listaProductos) {
-        int contador = 0;
-        for (VentaProducto producto : listaProductos){
-            contador+=producto.getCantidad();
-        }
-        return contador;
-    }
 }

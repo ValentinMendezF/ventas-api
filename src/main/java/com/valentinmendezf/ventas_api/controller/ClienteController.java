@@ -1,6 +1,6 @@
 package com.valentinmendezf.ventas_api.controller;
 
-import com.valentinmendezf.ventas_api.model.Cliente;
+import com.valentinmendezf.ventas_api.dto.ClienteDTO;
 import com.valentinmendezf.ventas_api.service.IClienteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -27,12 +27,12 @@ public class ClienteController {
     }
 
     @GetMapping("/clientes")
-    public ResponseEntity<List<Cliente>> getAllClientes() {
+    public ResponseEntity<List<ClienteDTO>> getAllClientes() {
         return ResponseEntity.ok(iClienteService.getAllClientes());
     }
 
     @GetMapping("/clientes/{id}")
-    public ResponseEntity<Cliente> getOneCliente(@PathVariable Long id) {
+    public ResponseEntity<ClienteDTO> getOneCliente(@PathVariable Long id) {
         try {
             return ResponseEntity.ok(iClienteService.getOneCliente(id));
         } catch (Exception e) {
