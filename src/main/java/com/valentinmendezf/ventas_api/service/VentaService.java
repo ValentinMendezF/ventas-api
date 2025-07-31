@@ -133,6 +133,10 @@ public class VentaService implements IVentaService {
     @Override
     @Transactional
     public void deleteVenta(Long codigo) {
+        Venta venta = iVentaRepository.findById(codigo).orElseThrow();
+        for (VentaProducto ventaProducto : venta.getListaVentasProductos()){
+            devolverProductos(ventaProducto.getProducto(),ventaProducto.getCantidad());
+        }
         iVentaRepository.deleteById(codigo);
     }
 
