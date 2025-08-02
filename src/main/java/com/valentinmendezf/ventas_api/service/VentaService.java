@@ -144,10 +144,8 @@ public class VentaService implements IVentaService {
         for (VentaProducto ventaProducto : venta.getListaVentasProductos()){
             devolverProductos(ventaProducto.getProducto(),ventaProducto.getCantidad());
         }
-        Cliente cliente = venta.getCliente();
-
         deleteVenta(codigo);
-        createVenta(cliente.getIdCliente(), listaProductosDTO);
+        createVenta(venta.getCliente().getIdCliente(), listaProductosDTO);
     }
 
     @Override
@@ -163,8 +161,12 @@ public class VentaService implements IVentaService {
         List<ProductoSalidaDTO> productosPocoStockSalidaDTO = new ArrayList<>();
         for (Producto producto : listaProductos){
             if (producto.getCantidadDisponible() < 5){
-                productosPocoStockSalidaDTO.add(new ProductoSalidaDTO(producto.getCodigoProducto(), producto.getNombre(),
-                        producto.getMarca(), producto.getCosto(), producto.getCantidadDisponible()));
+                productosPocoStockSalidaDTO.add(new ProductoSalidaDTO(
+                        producto.getCodigoProducto(),
+                        producto.getNombre(),
+                        producto.getMarca(),
+                        producto.getCosto(),
+                        producto.getCantidadDisponible()));
             }
         }
         return productosPocoStockSalidaDTO;
@@ -208,8 +210,12 @@ public class VentaService implements IVentaService {
             cantidadProductos += productoEntradaDTO.getCantidadComprada();
         }
         ClienteDTO clienteDTO = iClienteService.getOneCliente(mayorVentaDTO.getIdCliente());
-        return new VentaMayorDTO(mayorVentaDTO.getCodigoVenta(), mayorVentaDTO.getTotal(), cantidadProductos,
-                clienteDTO.getNombre(), clienteDTO.getApellido());
+        return new VentaMayorDTO(
+                mayorVentaDTO.getCodigoVenta(),
+                mayorVentaDTO.getTotal(),
+                cantidadProductos,
+                clienteDTO.getNombre(),
+                clienteDTO.getApellido());
     }
 
 }
