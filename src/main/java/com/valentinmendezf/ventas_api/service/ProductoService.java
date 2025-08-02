@@ -29,13 +29,12 @@ public class ProductoService implements IProductoService{
         List<Producto> productos = iProductoRepository.findAll();
         List<ProductoSalidaDTO> productosSalidaDTO = new ArrayList<>();
         for (Producto producto : productos){
-            ProductoSalidaDTO productoSalidaDTO = new ProductoSalidaDTO();
-            productoSalidaDTO.setCodigoProducto(producto.getCodigoProducto());
-            productoSalidaDTO.setNombre(producto.getNombre());
-            productoSalidaDTO.setCosto(producto.getCosto());
-            productoSalidaDTO.setMarca(producto.getMarca());
-            productoSalidaDTO.setCantidadDisponible(producto.getCantidadDisponible());
-            productosSalidaDTO.add(productoSalidaDTO);
+            productosSalidaDTO.add(new ProductoSalidaDTO(
+                    producto.getCodigoProducto(),
+                    producto.getNombre(),
+                    producto.getMarca(),
+                    producto.getCosto(),
+                    producto.getCantidadDisponible()));
         }
         return productosSalidaDTO;
     }
@@ -43,13 +42,12 @@ public class ProductoService implements IProductoService{
     @Override
     public ProductoSalidaDTO getOneProducto(Long codigo) {
         Producto producto = iProductoRepository.findById(codigo).orElseThrow();
-        ProductoSalidaDTO productoSalidaDTO = new ProductoSalidaDTO();
-        productoSalidaDTO.setCodigoProducto(producto.getCodigoProducto());
-        productoSalidaDTO.setNombre(producto.getNombre());
-        productoSalidaDTO.setCosto(producto.getCosto());
-        productoSalidaDTO.setMarca(producto.getMarca());
-        productoSalidaDTO.setCantidadDisponible(producto.getCantidadDisponible());
-        return productoSalidaDTO;
+        return new ProductoSalidaDTO(
+                producto.getCodigoProducto(),
+                producto.getNombre(),
+                producto.getMarca(),
+                producto.getCosto(),
+                producto.getCantidadDisponible());
     }
 
     @Override

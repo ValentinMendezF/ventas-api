@@ -28,12 +28,11 @@ public class ClienteService implements IClienteService {
         List<Cliente> listaClientes = iClienteRepository.findAll();
         List<ClienteDTO> listaClientesDTO = new ArrayList<>();
         for (Cliente cliente : listaClientes){
-            ClienteDTO clienteDTO = new ClienteDTO();
-            clienteDTO.setIdCliente(cliente.getIdCliente());
-            clienteDTO.setNombre(cliente.getNombre());
-            clienteDTO.setApellido(cliente.getApellido());
-            clienteDTO.setDni(cliente.getDni());
-            listaClientesDTO.add(clienteDTO);
+            listaClientesDTO.add(new ClienteDTO(
+                    cliente.getIdCliente(),
+                    cliente.getNombre(),
+                    cliente.getApellido(),
+                    cliente.getDni()));
         }
         return listaClientesDTO;
     }
@@ -41,7 +40,10 @@ public class ClienteService implements IClienteService {
     @Override
     public ClienteDTO getOneCliente(Long idCliente) {
         Cliente cliente = iClienteRepository.findById(idCliente).orElseThrow();
-        return new ClienteDTO(cliente.getIdCliente(), cliente.getNombre(), cliente.getApellido(),
+        return new ClienteDTO(
+                cliente.getIdCliente(),
+                cliente.getNombre(),
+                cliente.getApellido(),
                 cliente.getDni());
     }
 

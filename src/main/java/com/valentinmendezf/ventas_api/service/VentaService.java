@@ -85,23 +85,21 @@ public class VentaService implements IVentaService {
         List<VentaDTO> listaVentasDTO = new ArrayList<>();
         for (Venta venta : listaVentas) {
             List<ProductoEntradaDTO> listaProductos = new ArrayList<>();
-            VentaDTO ventaDTO = new VentaDTO();
-            ventaDTO.setCodigoVenta(venta.getCodigoVenta());
-            ventaDTO.setTotal(venta.getTotal());
-            ventaDTO.setFechaVenta(venta.getFechaVenta());
-            ventaDTO.setIdCliente(venta.getCliente().getIdCliente());
-            ventaDTO.setNombreCliente(venta.getCliente().getNombre());
             for (VentaProducto ventaProducto : venta.getListaVentasProductos()) {
-                ProductoEntradaDTO productoEntradaDTO = new ProductoEntradaDTO();
-                productoEntradaDTO.setCodigoProducto(ventaProducto.getProducto().getCodigoProducto());
-                productoEntradaDTO.setCosto(ventaProducto.getProducto().getCosto());
-                productoEntradaDTO.setMarca(ventaProducto.getProducto().getMarca());
-                productoEntradaDTO.setNombre(ventaProducto.getProducto().getNombre());
-                productoEntradaDTO.setCantidadComprada(ventaProducto.getCantidad());
-                listaProductos.add(productoEntradaDTO);
+                listaProductos.add(new ProductoEntradaDTO(
+                        ventaProducto.getProducto().getCodigoProducto(),
+                        ventaProducto.getProducto().getNombre(),
+                        ventaProducto.getProducto().getMarca(),
+                        ventaProducto.getProducto().getCosto(),
+                        ventaProducto.getCantidad()));
             }
-            ventaDTO.setListaProductos(listaProductos);
-            listaVentasDTO.add(ventaDTO);
+            listaVentasDTO.add(new VentaDTO(
+                    venta.getCodigoVenta(),
+                    venta.getFechaVenta(),
+                    venta.getTotal(),
+                    listaProductos,
+                    venta.getCliente().getIdCliente(),
+                    venta.getCliente().getNombre()));
         }
         return listaVentasDTO;
     }
@@ -110,24 +108,22 @@ public class VentaService implements IVentaService {
     @Transactional
     public VentaDTO getOneVenta(Long codigo) {
         Venta venta = iVentaRepository.findById(codigo).orElseThrow();
-        VentaDTO ventaDTO = new VentaDTO();
         List<ProductoEntradaDTO> listaProductos = new ArrayList<>();
         for (VentaProducto ventaProducto : venta.getListaVentasProductos()) {
-            ProductoEntradaDTO productoEntradaDTO = new ProductoEntradaDTO();
-            productoEntradaDTO.setNombre(ventaProducto.getProducto().getNombre());
-            productoEntradaDTO.setCodigoProducto(ventaProducto.getProducto().getCodigoProducto());
-            productoEntradaDTO.setCosto(ventaProducto.getProducto().getCosto());
-            productoEntradaDTO.setMarca(ventaProducto.getProducto().getMarca());
-            productoEntradaDTO.setCantidadComprada(ventaProducto.getCantidad());
-            listaProductos.add(productoEntradaDTO);
+            listaProductos.add(new ProductoEntradaDTO(
+                    ventaProducto.getProducto().getCodigoProducto(),
+                    ventaProducto.getProducto().getNombre(),
+                    ventaProducto.getProducto().getMarca(),
+                    ventaProducto.getProducto().getCosto(),
+                    ventaProducto.getCantidad()));
         }
-        ventaDTO.setListaProductos(listaProductos);
-        ventaDTO.setCodigoVenta(venta.getCodigoVenta());
-        ventaDTO.setFechaVenta(venta.getFechaVenta());
-        ventaDTO.setTotal(venta.getTotal());
-        ventaDTO.setIdCliente(venta.getCliente().getIdCliente());
-        ventaDTO.setNombreCliente(venta.getCliente().getNombre());
-        return ventaDTO;
+        return new VentaDTO(
+                venta.getCodigoVenta(),
+                venta.getFechaVenta(),
+                venta.getTotal(),
+                listaProductos,
+                venta.getCliente().getIdCliente(),
+                venta.getCliente().getNombre());
     }
 
     @Override
